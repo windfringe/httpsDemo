@@ -1,0 +1,6 @@
+基于AFNetworking的https双向验证demo
+
+
+#运行
+
+需要把你的客户端p12文件打包到app的bundle里面，同时替换代码中的url和p12密码才可以运行
