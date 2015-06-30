@@ -11,6 +11,8 @@
 
 #define kAllowsInvalidSSLCertificate 1
 
+static NSString * const WFHTTPURL = @"https://www.example.com";
+
 @interface ViewController ()
 
 @end
@@ -19,19 +21,47 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
-    [self sslRequest];
+    
+    // 双向验证
+    [self bidirectionalAuthentication];
+    
+    // 服务端单向验证
+    [self serverAuthentication];
+}
+
+// ssl server authentication 单向验证
+- (void)serverAuthentication
+{
+    AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc]init];
+    
+    // 服务端证书路径
+    NSString *cerPath = [[NSBundle mainBundle] pathForResource:@"server" ofType:@"cer"];
+    NSData *certData = [NSData dataWithContentsOfFile:cerPath];
+    
+    AFSecurityPolicy *securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
+    [securityPolicy setAllowInvalidCertificates:YES];
+    [securityPolicy setPinnedCertificates:@[certData]];
+    
+    manager.securityPolicy = securityPolicy;
+    
+
+    [manager GET:WFHTTPURL parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"response object: %@",responseObject);
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"error: %@",error);
+    }];
 }
 
 
-- (void)sslRequest
+
+// ssl bidirectional authentication 双向验证
+- (void)bidirectionalAuthentication
 {
     AFHTTPRequestSerializer *reqSerializer = [AFHTTPRequestSerializer serializer];
     
     NSMutableURLRequest *request;
     
-    NSString *httpsURL = @"https://www.example.com";
-    request = [reqSerializer requestWithMethod:@"GET" URLString:httpsURL parameters:nil error:nil];
+    request = [reqSerializer requestWithMethod:@"GET" URLString:WFHTTPURL parameters:nil error:nil];
     
     AFSecurityPolicy *securityPolicy = [[AFSecurityPolicy alloc] init];
     [securityPolicy setAllowInvalidCertificates:kAllowsInvalidSSLCertificate];
@@ -77,7 +107,7 @@
              We can get it from a .p12 file, but you need a passphrase:
              */
             
-            NSData *p12Data = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"ios_cer" ofType:@"pfx"]];
+            NSData *p12Data = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"ios" ofType:@"pfx"]];
             
             // your p12 password
             CFStringRef password = CFSTR("p12 PASSPHRASE");
