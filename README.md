@@ -9,7 +9,7 @@
 
 调用方法：
 
-－ (void)bidirectionalAuthentication;
+    - (void)bidirectionalAuthentication;
 
 #更新
 
@@ -17,4 +17,4 @@
 
 需要将服务端的cer文件引入app，文件路径可自行修改
 
-－ (void)serverAuthentication;
+    - (void)serverAuthentication;
