@@ -22,3 +22,7 @@
 调用方法：
 
     - (void)serverAuthentication;
+
+
+# 补充
+请使用AFnetworking 2.x版本
